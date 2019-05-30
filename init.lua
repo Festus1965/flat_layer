@@ -8,9 +8,12 @@ mod.version = '20190529'
 mod.path = minetest.get_modpath(minetest.get_current_modname())
 mod.world = minetest.get_worldpath()
 
-local lower_limit = 0
-local upper_limit = 30000
-local step = 5000
+local upper_limit = 31000
+local lower_limit = -31000
+local step = 6000
+local bumped_lower_limit = math.floor((lower_limit + 3000) / step) * step
+
+local max_dim = 31000
 
 
 do
@@ -26,10 +29,10 @@ do
 				v.y_min = -(step / 2)
 			end
 
-			for y = lower_limit, upper_limit, step do
+			for y = bumped_lower_limit, upper_limit, step do
 				local w = table.copy(v)
-				w.y_max = y + (v.y_max or (step / 2))
-				w.y_min = y + (v.y_min or -(step / 2))
+				w.y_max = math.min(max_dim, y + (v.y_max or (step / 2)))
+				w.y_min = math.max(-max_dim, y + (v.y_min or -(step / 2)))
 				biomes[#biomes+1] = w
 				if v.name and y ~= 0 then
 					w.name = v.name..y
@@ -65,10 +68,10 @@ do
 
 		if v.y_max or v.y_min then
 			if not v.y_max then
-				v.y_max = 31000
+				v.y_max = max_dim
 			end
 			if not v.y_min then
-				v.y_min = -31000
+				v.y_min = -max_dim
 			end
 
 			if v.y_min < lower_limit then
@@ -96,10 +99,10 @@ do
 				v.y_min = -(step / 2)
 			end
 
-			for y = lower_limit, upper_limit, step do
+			for y = bumped_lower_limit, upper_limit, step do
 				local w = table.copy(v)
-				w.y_max = y + (v.y_max or (step / 2))
-				w.y_min = y + (v.y_min or -(step / 2))
+				w.y_max = math.min(max_dim, y + (v.y_max or (step / 2)))
+				w.y_min = math.max(-max_dim, y + (v.y_min or -(step / 2)))
 				if v.name and y ~= 0 then
 					w.name = v.name..y
 				end
