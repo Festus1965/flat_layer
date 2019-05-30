@@ -1,0 +1,48 @@
+diff --git a/src/mapgen/mapgen_flat.cpp b/src/mapgen/mapgen_flat.cpp
+index 11b27f85..4dce91be 100644
+--- a/src/mapgen/mapgen_flat.cpp
++++ b/src/mapgen/mapgen_flat.cpp
+@@ -188,6 +188,13 @@ void MapgenFlat::makeChunk(BlockMakeData *data)
+ 
+ 	blockseed = getBlockSeed2(full_node_min, seed);
+ 
++	s16 real_ground_level = ground_level;
++	s16 real_water_level = water_level;
++
++	s16 rel_alt = (node_min.Y + LAYER_DIV * LAYER_DEPTH + LAYER_DEPTH / 2) / LAYER_DEPTH - LAYER_DIV;
++	ground_level = ground_level + rel_alt * LAYER_DEPTH;
++	water_level = water_level + rel_alt * LAYER_DEPTH;
++
+ 	// Generate base terrain, mountains, and ridges with initial heightmaps
+ 	s16 stone_surface_max_y = generateTerrain();
+ 
+@@ -197,9 +204,15 @@ void MapgenFlat::makeChunk(BlockMakeData *data)
+ 	// Init biome generator, place biome-specific nodes, and build biomemap
+ 	if (flags & MG_BIOMES) {
+ 		biomegen->calcBiomeNoise(node_min);
++		for (s32 i = 0; i < csize.X * csize.Z; i++) {
++			((BiomeGenOriginal *)biomegen)->heatmap[i] -= 20.f * (float) (heightmap[i] - ground_level + real_ground_level) / 50.f + 5.f;
++		}
+ 		generateBiomes();
+ 	}
+ 
++	ground_level = real_ground_level;
++	water_level = real_water_level;
++
+ 	if (flags & MG_CAVES) {
+ 		// Generate tunnels
+ 		generateCavesNoiseIntersection(stone_surface_max_y);
+diff --git a/src/mapgen/mapgen_flat.h b/src/mapgen/mapgen_flat.h
+index d8ec9f12..00f32af0 100644
+--- a/src/mapgen/mapgen_flat.h
++++ b/src/mapgen/mapgen_flat.h
+@@ -26,6 +26,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
+ #define MGFLAT_LAKES 0x01
+ #define MGFLAT_HILLS 0x02
+ 
++#define LAYER_DIV 5
++#define LAYER_DEPTH 6000
++
+ class BiomeManager;
+ 
+ extern FlagDesc flagdesc_mapgen_flat[];
