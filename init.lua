@@ -64,6 +64,31 @@ do
 		end
 
 		if v.y_max or v.y_min then
+			if not v.y_max then
+				v.y_max = 31000
+			end
+			if not v.y_min then
+				v.y_min = -31000
+			end
+
+			if v.y_min < lower_limit then
+				local w = table.copy(v)
+				w.y_max = lower_limit
+				if v.name then
+					w.name = v.name..'low'
+				end
+				decos[#decos+1] = w
+			end
+
+			if v.y_max > upper_limit then
+				local w = table.copy(v)
+				w.y_min = upper_limit
+				if v.name then
+					w.name = v.name..'high'
+				end
+				decos[#decos+1] = w
+			end
+
 			if v.y_max and v.y_max > (step / 2) then
 				v.y_max = (step / 2)
 			end
@@ -75,10 +100,10 @@ do
 				local w = table.copy(v)
 				w.y_max = y + (v.y_max or (step / 2))
 				w.y_min = y + (v.y_min or -(step / 2))
-				decos[#decos+1] = w
 				if v.name and y ~= 0 then
 					w.name = v.name..y
 				end
+				decos[#decos+1] = w
 				--print(name, w.y_min, w.y_max)
 			end
 		else
