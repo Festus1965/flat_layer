@@ -57,7 +57,7 @@ do
 			local nb = {}
 			for _, ob in pairs(v.biomes) do
 				nb[#nb+1] = ob
-				for yb = lower_limit, upper_limit, step do
+				for yb = bumped_lower_limit, upper_limit, step do
 					if yb ~= 0 then
 						nb[#nb+1] = ob..yb
 					end
